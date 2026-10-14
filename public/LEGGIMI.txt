@@ -1,0 +1,3 @@
+Metti qui i tuoi file:
+  results.xlsx   (o .csv: rinominalo e cambia resultsFile in Root.tsx)
+  track.gpx

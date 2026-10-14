@@ -1,0 +1,5 @@
+node_modules/
+out/
+public/results.xlsx
+public/track.gpx
+.DS_Store
