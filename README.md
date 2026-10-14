@@ -1,34 +1,58 @@
-# Orienteering Overlay (Remotion)
+# 🧭 Orienteering Video Overlay
 
-## Setup (una volta)
-    npm install
+Data-driven graphic overlay generator for POV orienteering videos, built with [Remotion](https://www.remotion.dev/) and React.
 
-## Uso
-1. Copia in `public/` i file `results.xlsx` e `track.gpx`.
-2. In `src/Root.tsx` imposta `raceName`, `category`, `targetName`
-   (o modificali nello Studio, pannello "Props").
-3. Anteprima: `npm run studio` (sfondo verde solo in anteprima).
-4. Test rapido (primi 10 s): `npm run test:10s`
-5. Render completo con trasparenza:
-   - ProRes 4444 (.mov, consigliato per Final Cut/Premiere/DaVinci): `npm run render:mov`
-   - WebM VP8 con alfa: `npm run render:webm`
+This tool takes a GPS track (`.gpx`) and race results (`.xlsx`) as input to generate animated, transparent video clips (alpha channel), ready to be overlaid onto first-person videos (e.g., headcams) during video editing.
 
-Il file finisce in `out/`. Sovrapponilo al video della gara, allineando lo start.
-`startOffset` (in secondi) serve per far partire l'overlay da un punto diverso della gara.
+## ✨ Features
 
-## Differenze rispetto al prototipo HTML
-- Tutto è funzione del frame: niente setInterval, niente timer. Ogni frame è deterministico.
-- Pace calcolato sugli ultimi 10 s di GPX (più stabile del singolo intervallo).
-- Il nome atleta viene risolto una volta sola; errore chiaro se non trovato.
-- Dislivello: pendenza (ultimi 15 s) e D+ accumulato, letti dal tag `<ele>` del GPX.
-  La quota viene livellata (`ELE_SMOOTH_RADIUS` in `src/data.ts`): il D+ può differire
-  da quello dell'orologio o di Strava, che usano altimetro barometrico/correzioni proprie.
-  Se il GPX non ha quota, i due campi mostrano `--`.
+* **Deterministic sync:** Everything is frame-driven. No inaccurate timers: every animation is strictly tied to the race time calculated from the GPX and the starting offset.
+* **Real-time sensors:** Dynamic calculation of heart rate, pace (on a 10s rolling window for better stability), slope (%) calculated over the last 15s, and smoothed accumulated elevation gain.
+* **Dynamic standings:** Partial standings at each control point passage (Overall Top 3 + target athlete's gap) and leg times.
+* **Optimized for editing:** Native export in Apple ProRes 4444 (`.mov`) for maximum quality and perfect alpha channel handling in NLE software like Final Cut Pro and DaVinci Resolve.
 
-## Due video separati (meno pixel)
-Composizioni disponibili nello Studio: `Overlay` (tutto, 1920x1080), `Left` (340x540) e `Splits` (440x420).
+## 🚀 Installation
 
-- Colonna sinistra: `npm run render:left` -> `out/left.mov`. Posizione nel montaggio (su 1920x1080): X=25, Y=540.
-- Split al centro, un solo video lungo: `npm run render:splits` -> `out/splits_full.mov`. Posizione: X=740, Y=330.
-- Split al centro, una clip per controllo (molto più veloce): `npm run render:splits-clips`.
-  Crea `out/splits/split_C01.mov`, ... e `INDICE.txt` con il momento in cui mettere ciascuna clip.
+1. Make sure you have Node.js installed.
+2. Clone the repository and navigate into the folder:
+   ```bash
+   git clone https://github.com/samueleacler/orienteering-overlay-script.git
+   cd orienteering-overlay-script
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+## 🏃‍♂️ Usage
+
+1. Copy your personal race files `results.xlsx` and `track.gpx` into the `public/` folder.
+2. Open `src/Root.tsx` and set the race data (or modify them in real-time from the "Props" panel in the Remotion Studio):
+   * `raceName` and `category`
+   * `targetName` (exact name of the athlete to track)
+   * `startOffset` (seconds from which to start the overlay relative to the start)
+3. Start the preview:
+   ```bash
+   npm run studio
+   ```
+   *(Note: the green background is only visible during preview to check contrast).*
+
+## 🎬 Rendering and Exporting
+
+The project includes three different compositions to optimize rendering times and give you flexibility on the timeline:
+
+* **Full Overlay (1920x1080):**
+  Exports the entire screen.
+  ```bash
+  npm run render:mov
+  ```
+* **Left Data Panel (340x540):**
+  Exports only the sensors to save processed pixels. Place at `X=25, Y=540` on a 1080p timeline.
+  ```bash
+  npm run render:left
+  ```
+* **Split Clips (440x420):**
+  Instead of exporting a mostly empty video 90% of the time, this command generates a single short clip (about 9 seconds) for each control passage and an `INDICE.txt` file with timestamp instructions to place each clip on your editing timeline.
+  ```bash
+  npm run render:splits-clips
+  ```
